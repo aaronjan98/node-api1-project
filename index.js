@@ -53,13 +53,32 @@ server.delete('/api/users/:id', (req, res) => {
     const { id } = req.params;
 
     Users.remove(id).then(removed => {
-        console.log('remove user', removed);
-
         !removed ? res.status(404).json({ message: "The user with the specified ID does not exist." })
         : res.status(200).json(removed);
     }).catch(err => {
         console.log(err);
         res.status(500).json({ errorMessage: "The user could not be removed" });
+    });
+})
+
+server.put('/api/users/:id', (req, res) => {
+    const { id } = req.params;
+    const { body } = req;
+
+    Users.update(id, body).then(user => {        
+        switch(user){
+            case !id:
+                res.status(404).json({ message: "The user with the specified ID does not exist." });
+                break;
+            case !body.name || !body.bio:
+                res.status(400).json({ errorMessage: "Please provide name and bio for the user." });
+                break;
+            default:
+                res.status(200).json(user);
+        }
+    }).catch(err => {
+        console.log(err);
+        res.status(500).json({ errorMessage: "The user information could not be modified." });
     });
 })
 
